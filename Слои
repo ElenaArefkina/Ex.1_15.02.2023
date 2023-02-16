@@ -1,0 +1,39 @@
+!pip install numpy==1.22.0  # какие-то проблемы с зависимостямя
+!pip install geopandas mapclassify  # mapclassify для визуализации
+!pip install keplergl  # для визуализации
+!pip install osmnx  # устанавливаем модуль osmnx
+
+from keplergl import KeplerGl
+import osmnx as ox
+
+from google.colab import output
+output.enable_custom_widget_manager()
+
+TERITORY_NAME = 'Саранск'
+territory = ox.geocode_to_gdf(TERITORY_NAME)
+territory.explore(tiles="CartoDB positron")
+
+tags = {'admin_level': '9'}
+districts = ox.geometries_from_polygon(territory.unary_union, tags)
+districts.head()
+
+districts.explore(tiles="CartoDB positron")
+
+district_NAME = 'Октябрьский район, Саранск'
+district = ox.geocode_to_gdf(district_NAME)
+district.explore(tiles="CartoDB positron")
+
+tags_1 = {'building': True}
+buildings = ox.geometries_from_polygon(district.unary_union, tags_1)
+buildings.head()
+
+buildings.explore(tiles="CartoDB positron")
+
+buildings.reset_index(inplace=True)
+buildings.head()
+
+map_Saransk = KeplerGl(height=500)
+map_Saransk.add_data(data=districts.copy(), name='Районы')
+map_Saransk.add_data(data=buildings.copy(), name='Здания')
+map_Saransk.add_data(data=territory.copy(), name='Город')
+map_Saransk
